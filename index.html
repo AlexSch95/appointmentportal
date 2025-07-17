@@ -37,10 +37,15 @@
                                     <div class="mb-3"><input class="form-control" type="email" id="bookingEmail" name="email" placeholder="Email" required></div>
                                     <div class="mb-3"><input class="form-control" id="bookingDate" type="datetime-local" required></div>
                                     <div class="mb-3"><textarea class="form-control" id="bookingMessage" name="message" rows="4" placeholder="Was ist der Anlass des Termins?" required></textarea></div>
-                                    <div><button class="btn btn-success w-100 d-block" type="submit" onclick="submitAppointment()">Anfrage einreichen</button></div>
+                                    <div><button class="btn btn-success w-100 d-block" onclick="submitAppointment()">Anfrage einreichen</button></div>
                                 </form>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div class="row d-flex justify-content-center">
+                    <div id="errorMessage" class="alert alert-danger row d-flex justify-content-center position-relative fade" role="alert" style="width: 532px;">
+                        <strong>Fehler!</strong> <span id="errorText"></span>
                     </div>
                 </div>
             </div>

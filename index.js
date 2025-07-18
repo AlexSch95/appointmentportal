@@ -14,7 +14,7 @@ async function submitAppointment() {
     console.log(bookingDate.value)
 
     try {
-        const response = await fetch('http://localhost:3000/appointments', {
+        const response = await fetch('http://localhost:3001/appointments', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -42,3 +42,4 @@ function showError(message) {
         document.getElementById('errorMessage').classList.remove('show');
     }, 3000);
 }
+

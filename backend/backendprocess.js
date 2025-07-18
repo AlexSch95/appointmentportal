@@ -45,6 +45,6 @@ app.post("/appointments", (req, res) => {
     res.status(201).json(incomingAppointment)
 })
 
-app.listen(3000, () => {
-    console.log("Server läuft auf http://localhost:3000");
+app.listen(3001, () => {
+    console.log("Server läuft auf http://localhost:3001");
 })

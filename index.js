@@ -3,16 +3,7 @@ async function submitAppointment() {
     const bookingEmail = document.getElementById("bookingEmail");
     const bookingDate = document.getElementById("bookingDate");
     const bookingMessage = document.getElementById("bookingMessage");
-
-    let newAppointment = {
-        name: bookingName.value,
-        email: bookingEmail.value,
-        date: bookingDate.value,
-        message: bookingMessage.value
-    };
-    console.log(newAppointment);
-    console.log(bookingDate.value)
-
+    
     try {
         const response = await fetch('http://localhost:3001/appointments', {
             method: "POST",

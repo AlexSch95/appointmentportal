@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
+const { connectToDatabase } = require("./db.js");
 
 const app = express();
 
@@ -25,56 +26,71 @@ app.get('/', (req, res) => {
     res.send("Success")
 })
 
-app.get("/appointments", (req, res) => {
-    res.status(200).json(bookedAppointments)
-})
-
-app.post("/appointments", (req, res) => {
-    const { name, email, date, message } = req.body;
-    if (!name || !email || !date || !message) {
-        return res.status(400).json({error: "Unvollständige Daten übermittelt"})
+app.get("/appointments", async (req, res) => {
+    try {
+        const connection = await connectToDatabase();
+        const [rows] = await connection.execute('SELECT * FROM appointmentlist;');
+        await connection.end();
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error("Fehler beim laden der Termine", error);
+        res.status(500).json({error: "Fehler beim Laden der Termine"});
     }
-    const incomingAppointment = {
-        id: bookedAppointments[bookedAppointments.length - 1].id + 1,
-        name: name,
-        email: email,
-        date: date,
-        message: message,
-        new: true,
-        accepted: false
-    }
-    bookedAppointments.push(incomingAppointment)
-    res.status(201).json(incomingAppointment)
-})
-
-app.put('/appointments/:appointmentID', (req, res) => {
-    const idFromUrl = parseInt(req.params.appointmentID);
-    const appointment = bookedAppointments.find(appointment => appointment.id === idFromUrl);
-    if (!appointment) {
-        return res.status(404).json({error: "Termin nicht gefunden"});
-    };
-    const { accepted, newAppointment } = req.body;
-    appointment.accepted = accepted;
-    appointment.new = newAppointment;
-    res.status(200).json(appointment)
 });
 
-app.delete('/appointments/:appointmentID', (req,res) => {
-    // Hole dir die ID aus den URL Parametern und caste sie in einen Integer
-    const idFromUrl = parseInt(req.params.appointmentID);
-    // Finde den Index von dem Element, wo die Bedingung wahr ist
-    const appointmentIndex = bookedAppointments.findIndex(appointment => appointment.id === idFromUrl);
-    // Falls nicht gefunden, schmeiße einen Fehler
-    // Wir überprüfen auf -1, da findIndex -1 zurückgibt wenn nicht gefunden
-    if (appointmentIndex === -1){
-        return res.status(404).json({error: "Termin nicht gefunden"});
-    };
-    // Lösche aus dem todos-Array, das Element an dem Index todoIndex
-    bookedAppointments.splice(appointmentIndex, 1);
-    res.status(200).json({ message: "Termin wurde gelöscht"});
-    // Alternative: nur 204 als Statuscode ohne Message zurückgeben
-    // res.status(204).send();
+app.post("/appointments", async (req, res) => {
+    try {
+        const { name, email, date, message } = req.body;
+        if (!name || !email || !date || !message) {
+            return res.status(400).json({error: "Unvollständige Daten übermittelt"})
+        }
+        const connection = await connectToDatabase();
+        const [result] = await connection.execute("INSERT INTO appointmentlist (name, email, date, message) VALUES (?, ?, ?, ?)", [name, email, date, message]);
+        await connection.end();
+        res.status(201).json({id: result.insertId});
+    } catch (error) {
+        console.error("Fehler beim erstellen des Termins", error);
+        res.status(500).json({error: "Fehler beim erstellen des Termins"});
+    }
+})
 
+app.put('/appointments/:appointmentID', async (req, res) => {
+    try {
+        const idFromUrl = parseInt(req.params.appointmentID);
+        const { accepted, newAppointment } = req.body;
+        if (accepted === undefined || newAppointment === undefined || isNaN(idFromUrl)){
+            return res.status(400).json({error: "Unvollständige Daten übermittelt"})
+        }
+        const connection = await connectToDatabase();
+        const [result] = await connection.execute("UPDATE appointmentlist SET accepted = ?, newAppointment = ? WHERE id = ?", [accepted, newAppointment, idFromUrl])
+        await connection.end();
+        if (result.affectedRows === 0) {
+            return res.status(404).json({error: "Termin nicht gefunden"});
+        };
+        res.status(200).json({message: "Termin wurde angepasst", changes: result.affectedRows})
+    } catch (error) {
+        console.error("Fehler beim ändern des Termins", error);
+        res.status(500).json({error: "Fehler beim ändern des Termins"});
+    }
+});
+
+app.delete('/appointments/:appointmentID', async (req,res) => {
+    try {
+        const idFromUrl = parseInt(req.params.appointmentID);
+        if (isNaN(idFromUrl)){
+            return res.status(400).json({error: "Es wurde kein korrekter Parameter genutzt"})
+        }
+        const connection = await connectToDatabase();
+        const [result] = await connection.execute("DELETE FROM appointmentlist WHERE id = ?;", [idFromUrl])
+        await connection.end();
+        if (result.affectedRows === 0) {
+            return res.status(404).json({error: "Termin nicht gefunden"});
+        };
+        res.status(200).json({message: "Termin wurde gelöscht", changes: result.affectedRows})
+    } catch (error) {
+        console.error("Fehler beim löschen des Termins", error);
+        res.status(500).json({error: "Fehler beim löschen des Termins"});
+    }
 })
 
 app.listen(3001, () => {

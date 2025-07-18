@@ -10,6 +10,7 @@ async function getAppointmentsFromAPI() {
         responseJson.forEach(appointment => {
             bookedAppointmentsLocal.push(appointment);
         });
+        console.log(bookedAppointmentsLocal);
         renderOpenAppointments();
     } catch (error) {
         console.error(error);
@@ -61,11 +62,11 @@ function renderOpenAppointments() {
             </li>
         `;
         switch (currentAppointment.accepted) {
-            case true:
+            case 1:
                 acceptedGroup.innerHTML += acceptedListItem
                 break;
         
-            case false:
+            case 0:
                 unacceptedGroup.innerHTML += newListItem;
                 break;
         }
@@ -98,8 +99,8 @@ async function acceptAppointment(index) {
         method: 'PUT',
         headers: {'Content-Type': 'application/json',},
         body: JSON.stringify({
-            accepted: true,
-            newAppointment: false
+            accepted: 1,
+            newAppointment: 0
             })
         });
         if (!response.ok){

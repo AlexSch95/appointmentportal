@@ -94,6 +94,7 @@ function transformDate(originalDate) {
 
 async function acceptAppointment(index) {
     const appointmentID = bookedAppointmentsLocal[index].id
+    const appointment = bookedAppointmentsLocal[index]
     try {
         const response = await fetch(`http://localhost:3001/appointments/${appointmentID}`, {
         method: 'PUT',
@@ -106,17 +107,24 @@ async function acceptAppointment(index) {
         if (!response.ok){
             throw new Error(`HTTP Error: ${response.status}`);
         }
+        const formattedDate = transformDate(appointment.date);
+
+        const mailRecipient = appointment.email;
+        const mailName = appointment.name;
+        const mailTopic = appointment.message;
+        const mailSubject = `Ihr Termin am ${formattedDate} wurde bestätigt`
+        const mailBody = `Guten Tag ${mailName},\n\nHiermit bestätigen wir Ihre Anfrage für einen Termin am ${formattedDate} mit dem Anlass "${mailTopic}".\n\nMit freundlichen Grüßen,\nMax Mustermann`;;
+        window.location.href = `mailto:${mailRecipient}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
         bookedAppointmentsLocal = [];
         getAppointmentsFromAPI();
     } catch (error) {
         console.error(error);
-    } finally {
-        alert("Platzhalter: beim Annehmen einer Terminanfrage wird automatisch eine Mail generiert in der die Ursprüngliche Terminanfrage beinhaltet ist und zeitgleich die Bestätigung, dass der Termin akzeptiert wurde. Die Anfrage wird ebenfalls in den Bereich für akzeptierte Termine verschoben");
     }
 }
 
 async function declineAppointment(index) {
     const appointmentID = bookedAppointmentsLocal[index].id
+    const appointment = bookedAppointmentsLocal[index]
     try {
         const response = await fetch(`http://localhost:3001/appointments/${appointmentID}`, {
             method: 'DELETE'
@@ -124,6 +132,14 @@ async function declineAppointment(index) {
         if (!response.ok) {
             throw new Error(`HTTP Error: ${response.status}`);
         };
+        const formattedDate = transformDate(appointment.date);
+
+        const mailRecipient = appointment.email;
+        const mailName = appointment.name;
+        const mailTopic = appointment.message;
+        const mailSubject = `Ihr Termin am ${formattedDate} wurde leider abgelehnt`
+        const mailBody = `Guten Tag ${mailName},\n\nLeider müssen wir Ihnen berichten, dass wir Ihren Termin am ${formattedDate} mit dem Anlass "${mailTopic}" nicht realisieren können.\n\nMit freundlichen Grüßen,\nMax Mustermann`;;
+        window.location.href = `mailto:${mailRecipient}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
         bookedAppointmentsLocal = [];
         getAppointmentsFromAPI();
     } catch (err) {

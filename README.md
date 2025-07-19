@@ -52,19 +52,22 @@
         - function renderOpenAppointments()
             - der Inhalt der 2 Anzeigebereiche wird beim Funktionsaufruf geleert
             - in einer for-Schleife wird abhängig vom Status (accepted: true/false) ein Listen-Item im jeweiligen Bereich erstellt (ausstehend/akzeptiert)
+            
         - function transformDate()
             - Eine Hilfsfunktion um das Datum aus dem Objekt in einen Lesbaren Zeitstempel zu Transformieren
             - Format "YYYY-MM-DDTHH:mm" wird zu "DD.MM.YYY um HH:mm Uhr"
+
         - async function acceptAppointment(index)
             - Wird via drücken auf den Akzeptieren Button eines Termins aufgerufen mit übergabe des index des zu akzeptierenden Objekts
             - Innerhalb der Funktion wird ein fetch mit der methode PUT durchgeführt. Die Eigenschaften "accepted" und "newAppointment" werden angepasst.
             - Nach dem fetch werden die Daten von der API erneut angefordert via Funktionsaufruf von getAppointmentsFromAPI() (noch nicht Optimal)
-            - ein Alert wird als Platzhalter für die automatische generierung einer Email angezeigt.
+            - Innerhalb der Funktion wird automatisch ein Email-Body generiert der dann zusätzlich zum Empfänger und einem Betreff an den Lokal installierten Emailclient übergeben wird
+
         - async function declineAppointment(index)
             - Wird via drücken auf den Löschen Button eines Termins aufgerufen mit übergabe des index des zu löschenden Objekts
             - Innerhalb der Funktion wird ein fetch mit der methode DELETE durchgeführt. Der jeweilige Termin wird dementsprechend Backendseitig gelöscht.
             - Nach dem fetch werden die Daten von der API erneut angefordert via Funktionsaufruf von getAppointmentsFromAPI() (noch nicht Optimal)
-            - ein Alert wird als Platzhalter für die automatische generierung einer Email angezeigt.
+            - Innerhalb der Funktion wird automatisch ein Email-Body generiert der dann zusätzlich zum Empfänger und einem Betreff an den Lokal installierten Emailclient übergeben wird
 
 ## ExpressJS API (backend/backendprocess.js)
 
